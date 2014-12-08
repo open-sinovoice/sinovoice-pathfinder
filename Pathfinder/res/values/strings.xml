@@ -1,0 +1,11 @@
+<resources>
+
+    <string name="app_name">Pathfinder</string>
+    <string name="settings_name">Pathfinder setting</string>
+	<string name="version">Version</string>
+	<string name="version_value">0.0.5</string>
+	
+	<string name="word_separators">\u0020.,;:!?\n()[]*&amp;@{}/&lt;&gt;_+=|&quot;</string>
+	
+	<string name="logo_text">灵云科技，源自清华，服务全球</string>
+</resources>
