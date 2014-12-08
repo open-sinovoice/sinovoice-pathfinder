@@ -10,7 +10,7 @@
 1. 首先需要checkout出项目。[https://github.com/open-sinovoice/sinovoice-pathfinder.git](https://github.com/open-sinovoice/sinovoice-pathfinder.git)
 2. 访问灵云开放平台&灵云开发者社区：[http://www.hcicloud.com/](http://www.hcicloud.com/)，注册账号并创建一个应用。获取DeveloperKey，AppKey，CloudUrl值，申请时要点选所需能力（hwr.local.freestylus）。
 3. 在IDE开发工具中导入Pathfinder工程，将DeveloperKey，AppKey，CloudUrl的值填写在Pathfinder工程中com.sinovoice.pathfinder.hcicloud.sys.SysConfig.java类中对应字段。
-4. 在IDE中编译运行，即可在调试终端查看和使用该输入法。
+4. 在IDE中编译运行，确保调试终端可以正常访问网络，获取到灵云能力的授权，即可在调试终端查看和使用该输入法。
 
 
 LICENSE
