@@ -20,7 +20,7 @@ Licensed under the MIT(Massachusetts Institute of Technology)
 
 相关资源
 ============
-1.灵云开放平台&灵云开发者社区：[http://www.hcicloud.com/](http://www.hcicloud.com/)。
-2.捷通华声灵云免费提供云端六大能力，包括语音识别ASR、语音合成TTS、手写识别HWR、图像识别OCR、语义理解NLU、机器翻译MT。
-3.登陆灵云开放平台及开发者社区，注册开发者账号，即可免费下载、使用六大能力SDK。
+1. 灵云开放平台&灵云开发者社区：[http://www.hcicloud.com/](http://www.hcicloud.com/)。
+2. 捷通华声灵云免费提供云端六大能力，包括语音识别ASR、语音合成TTS、手写识别HWR、图像识别OCR、语义理解NLU、机器翻译MT。
+3. 登陆灵云开放平台及开发者社区，注册开发者账号，即可免费下载、使用六大能力SDK。
 
