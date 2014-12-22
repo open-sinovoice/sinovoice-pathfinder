@@ -32,7 +32,8 @@ public class Pathfinder extends InputMethodService implements OnHwrRecogResultCh
     /**
      * 异步获取灵云授权后发送的消息的msg.what
      */
-    private static final int MSG_WHAT_CHECK_AUTH_FINISH = 1;
+    public static final int MSG_WHAT_CHECK_AUTH_FINISH = 1;
+    public static final int MSG_WHAT_ASR_RESULT = 2;
     
     private InputMethodManager mInputMethodManager;
     private MyHandler mHandler;
@@ -75,6 +76,7 @@ public class Pathfinder extends InputMethodService implements OnHwrRecogResultCh
         mCloudSysHelper = HciCloudSysHelper.getInstance();
         mCLoudHwrHelper = HciCloudHwrHelper.getInstance();
         mHwrManager = HWRManager.instance();
+        mHwrManager.init(this);
         
         //hcicloud sys init
         int errorCode = mCloudSysHelper.init(this);
@@ -108,7 +110,7 @@ public class Pathfinder extends InputMethodService implements OnHwrRecogResultCh
 		}
 		
 		//Hwr Manager
-		mHwrManager.init(this);
+		mHwrManager.prepareRecog();
 		mHwrManager.setOnHwrRecogResultChangedListener(this);
 	}
 	
@@ -116,7 +118,7 @@ public class Pathfinder extends InputMethodService implements OnHwrRecogResultCh
 	public View onCreateInputView() {
 		mInputView = (SVInputView) getLayoutInflater().inflate(R.layout.input, null);
 		mInputView.init(this);
-		
+
 		return mInputView;
 	}
 
@@ -124,12 +126,15 @@ public class Pathfinder extends InputMethodService implements OnHwrRecogResultCh
     public View onCreateCandidatesView() {
         mCandidateView = new CandidateView(this);
         mCandidateView.setService(this);
+        mCandidateView.setHandler(mHandler);
         return mCandidateView;
     }
     
     @Override
     public void onStartInputView(EditorInfo info, boolean restarting) {
     	super.onStartInputView(info, restarting);
+    	
+    	setCandidatesViewShown(true);
     }
 
     @Override
@@ -259,6 +264,7 @@ public class Pathfinder extends InputMethodService implements OnHwrRecogResultCh
         //检查授权文件的过期时间
         int errorCode = mCloudSysHelper.checkExpireTime();
         if (errorCode != HciCloudSysHelper.ERRORCODE_NONE) {
+            Log.w(TAG, "checkExpireTime error, errorCode = " + errorCode);
             checkAuthByThread();
             return false;
         } else {
@@ -268,6 +274,7 @@ public class Pathfinder extends InputMethodService implements OnHwrRecogResultCh
         //检查本地授权文件中是否包含本应用使用的所有capkeys
         errorCode = mCloudSysHelper.checkCapkeysEnable();
         if (errorCode != HciCloudSysHelper.ERRORCODE_NONE) {
+            Log.w(TAG, "checkCapkeysEnable error, errorCode = " + errorCode);
             checkAuthByThread();
             return false;
         }
@@ -341,13 +348,13 @@ public class Pathfinder extends InputMethodService implements OnHwrRecogResultCh
     
     public void setSuggestions(List<String> suggestions, boolean completions,
             boolean typedWordValid) {
-        if (suggestions != null && suggestions.size() > 0) {
-            setCandidatesViewShown(true);
-        } else if (isExtractViewShown()) {
-            setCandidatesViewShown(true);
-        }else{
-        	setCandidatesViewShown(false);
-        }
+//        if (suggestions != null && suggestions.size() > 0) {
+//            setCandidatesViewShown(true);
+//        } else if (isExtractViewShown()) {
+//            setCandidatesViewShown(true);
+//        }else{
+//        	setCandidatesViewShown(false);
+//        }
         
         if (mCandidateView != null) {
             mCandidateView.setSuggestions(suggestions, completions, typedWordValid);
@@ -472,7 +479,13 @@ public class Pathfinder extends InputMethodService implements OnHwrRecogResultCh
 					}
 		        }
 				break;
-
+			case MSG_WHAT_ASR_RESULT:
+			    String asrResult = (String) msg.obj;
+			    Log.i(TAG, "handler, asr result = " + asrResult);
+			    
+			    pathfinder.getCurrentInputConnection().commitText(asrResult, 1);
+			    pathfinder.updateCandidates();
+			    break;
 			default:
 				break;
 			}

@@ -8,6 +8,7 @@ import android.content.res.Configuration;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.sinovoice.hcicloudsdk.api.hwr.HciCloudHwr;
 import com.sinovoice.hcicloudsdk.common.HciErrorCode;
@@ -35,7 +36,7 @@ public class HWRManager implements OnStrokeViewListener{
 	private StrokeMgr strokeMgr;
 	private HwrRecogThread recogThread;
 	private OnHwrRecogResultChangedListener onHwrRecogResultChangedListener;
-//	private boolean mIsInited;
+	private boolean mIsInited;
 	private boolean mIsReleaseSuccess;
 	
 	private Context mContext;
@@ -66,8 +67,9 @@ public class HWRManager implements OnStrokeViewListener{
 	
 	public void init(Context context){
 		mContext = context;
-		
-		//≥ı ºªØhwr
+	}
+	
+	public void prepareRecog(){
 		strokeMgr = StrokeMgr.instance();
 		
 		Configuration config = mContext.getResources().getConfiguration();
@@ -85,7 +87,7 @@ public class HWRManager implements OnStrokeViewListener{
 		recogThread =  new HwrRecogThread();
 		recogThread.start();
 		
-//		mIsInited = true;
+		mIsInited = true;
 	}
 	
 	
@@ -157,6 +159,10 @@ public class HWRManager implements OnStrokeViewListener{
 	}
 
 	private void notifyRecog() {
+		if(!mIsInited){
+			Toast.makeText(mContext, "hwr init failed. Ensure in network and restart pathfinder.", Toast.LENGTH_SHORT).show();
+			return;
+		}
 		short[] data = strokeMgr.takeOutStroke();
 		synchronized (recogLock) {
 			strokeDatas.add(new StrokeData(data));			
@@ -187,7 +193,7 @@ public class HWRManager implements OnStrokeViewListener{
 			while(true){
 				if(isFinish){
 				    uninitCloudHWR(session);
-//					mIsInited = false;
+					mIsInited = false;
 					break;
 				}
 				
