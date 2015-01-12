@@ -9,6 +9,7 @@ import android.inputmethodservice.InputMethodService;
 import android.inputmethodservice.Keyboard;
 import android.os.Handler;
 import android.os.Message;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -23,10 +24,10 @@ import com.sinovoice.hcicloudsdk.common.hwr.HwrRecogResult;
 import com.sinovoice.hcicloudsdk.common.hwr.HwrRecogResultItem;
 import com.sinovoice.pathfinder.hcicloud.hwr.HWRManager;
 import com.sinovoice.pathfinder.hcicloud.hwr.HciCloudHwrHelper;
-import com.sinovoice.pathfinder.hcicloud.hwr.OnHwrRecogResultChangedListener;
+import com.sinovoice.pathfinder.hcicloud.hwr.OnHwrStateChangedListener;
 import com.sinovoice.pathfinder.hcicloud.sys.HciCloudSysHelper;
 
-public class Pathfinder extends InputMethodService implements OnHwrRecogResultChangedListener{
+public class Pathfinder extends InputMethodService implements OnHwrStateChangedListener{
     private static final String TAG = Pathfinder.class.getSimpleName();
     
     /**
@@ -411,6 +412,14 @@ public class Pathfinder extends InputMethodService implements OnHwrRecogResultCh
 		setSuggestions(suggestions, true, true);
 	}
 	
+    @Override
+    public void onStartWriteNewWord() {
+        String suggestion = mCandidateView.getFirstSuggestions();
+        if(!TextUtils.isEmpty(suggestion)){
+            pickSuggestionManually(0, suggestion);
+        }
+    }
+	
     private String getWordSeparators() {
         return mWordSeparators;
     }
@@ -492,4 +501,5 @@ public class Pathfinder extends InputMethodService implements OnHwrRecogResultCh
 			super.handleMessage(msg);
 		}
     }
+
 }

@@ -258,6 +258,14 @@ public class CandidateView extends View {
     public void setHandler(Handler handler){
         mHandler = handler;
     }
+    
+    public String getFirstSuggestions(){
+        String firstSuggestion = "";
+        if(mSuggestions != null && mSuggestions.size() > 0){
+            firstSuggestion = mSuggestions.get(0);
+        }
+        return firstSuggestion;
+    }
 
     @Override
     public int computeHorizontalScrollRange() {

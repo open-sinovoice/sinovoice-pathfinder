@@ -17,12 +17,14 @@ import com.sinovoice.hcicloudsdk.common.hwr.HwrConfig;
 import com.sinovoice.hcicloudsdk.common.hwr.HwrPenScriptResultItem;
 import com.sinovoice.hcicloudsdk.common.hwr.HwrRecogResult;
 import com.sinovoice.hcicloudsdk.common.hwr.HwrRecogResultItem;
+import com.sinovoice.pathfinder.Pathfinder;
 import com.sinovoice.pathfinder.hcicloud.sys.SysConfig;
 
 public class HWRManager implements OnStrokeViewListener{
 	private final String TAG = getClass().getSimpleName();
 	
 	private static final int MSG_WHAT_HWR_RECOG_RESULT_CHANGED = 0;
+	private static final int MSG_WHAT_HWR_START_NEW_WORK = 1;
 	private ArrayList<StrokeData> strokeDatas = new ArrayList<StrokeData>();
     private Object recogLock = new Object();
 	
@@ -35,21 +37,29 @@ public class HWRManager implements OnStrokeViewListener{
 	
 	private StrokeMgr strokeMgr;
 	private HwrRecogThread recogThread;
-	private OnHwrRecogResultChangedListener onHwrRecogResultChangedListener;
+	private OnHwrStateChangedListener onHwrRecogResultChangedListener;
 	private boolean mIsInited;
 	private boolean mIsReleaseSuccess;
 	
 	private Context mContext;
-	private Handler handler = new Handler(new Handler.Callback() {
+	private Handler mHandler = new Handler(new Handler.Callback() {
 		
 		@Override
 		public boolean handleMessage(Message msg) {
-			if(msg.what == MSG_WHAT_HWR_RECOG_RESULT_CHANGED){
-				
-				if(onHwrRecogResultChangedListener != null){
-					onHwrRecogResultChangedListener.onResultChanged((HwrRecogResult)  msg.obj);
-				}				
-			}
+		    switch (msg.what) {
+            case MSG_WHAT_HWR_RECOG_RESULT_CHANGED:
+                if(onHwrRecogResultChangedListener != null){
+                    onHwrRecogResultChangedListener.onResultChanged((HwrRecogResult)  msg.obj);
+                }
+                break;
+            case MSG_WHAT_HWR_START_NEW_WORK:
+                if(onHwrRecogResultChangedListener != null){
+                    onHwrRecogResultChangedListener.onStartWriteNewWord();
+                }
+                break;
+            default:
+                break;
+            }
 			return false;
 		}
 	}) ;
@@ -92,7 +102,7 @@ public class HWRManager implements OnStrokeViewListener{
 	
 	
 	public void setOnHwrRecogResultChangedListener(
-			OnHwrRecogResultChangedListener onHwrRecogResultChangedListener) {
+			OnHwrStateChangedListener onHwrRecogResultChangedListener) {
 		this.onHwrRecogResultChangedListener = onHwrRecogResultChangedListener;
 	}
 	
@@ -176,6 +186,8 @@ public class HWRManager implements OnStrokeViewListener{
 		notifyRecog();
 	}
 	
+	private boolean mIsFinishRecog = false;
+	
 	public class HwrRecogThread extends Thread{
 		
 		private boolean isFinish;
@@ -242,8 +254,15 @@ public class HWRManager implements OnStrokeViewListener{
 				
 				result = HciCloudHwr.hciHwrSessionStart(strConfig, session);
 				Log.v(TAG, "sessionStartResult = " + result);
+				
+				mIsFinishRecog = true;
 				return;
 			}
+			
+			if(mIsFinishRecog){
+			    mIsFinishRecog = false;
+                mHandler.sendEmptyMessage(MSG_WHAT_HWR_START_NEW_WORK);
+            }
 			
 			outRecogResult = new HwrRecogResult();
 			int ret = HciCloudHwr.hciHwrRecog(session, recogPoint, strConfig, outRecogResult);
@@ -259,7 +278,7 @@ public class HWRManager implements OnStrokeViewListener{
 			Message message = Message.obtain();
 			message.what = MSG_WHAT_HWR_RECOG_RESULT_CHANGED;
 			message.obj = outRecogResult;
-			handler.sendMessage(message);
+			mHandler.sendMessage(message);
 		}
 		
 	}
